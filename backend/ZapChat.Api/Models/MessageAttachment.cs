@@ -1,4 +1,5 @@
 namespace ZapChat.Api.Models;
+
 public class MessageAttachment
 {
     public int Id { get; set; }
@@ -10,7 +11,7 @@ public class MessageAttachment
     public string MimeType { get; set; } = string.Empty;    // "image/jpeg", "application/pdf"
     public int? Width { get; set; }                         // chỉ dùng cho ảnh/video
     public int? Height { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     // Navigation
     public Message Message { get; set; } = null!;

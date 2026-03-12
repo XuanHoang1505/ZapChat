@@ -8,6 +8,9 @@ using ZapChat.Api.Data;
 using ZapChat.Api.Hubs;
 using ZapChat.Api.Common.Response;
 using ZapChat.Api.Common.Exceptions;
+using ZapChat.Api.Services;
+using ZapChat.Api.Services.Interfaces;
+using ZapChat.Api.Common.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -93,20 +96,31 @@ builder.Services.AddSignalR(opt => {
 // AutoMapper
 // ─────────────────────────────────────────
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<JwtHelper>();
 
 // ─────────────────────────────────────────
 // DI — Services
 // ─────────────────────────────────────────
-// builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 // builder.Services.AddScoped<IUserService, UserService>();
 // builder.Services.AddScoped<IMessageService, MessageService>();
 // builder.Services.AddScoped<IConversationService, ConversationService>();
-// builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
+// Các service khác (gửi mail, upload ảnh, OTP)
+builder.Services.AddScoped<ISendMailService, SendMailService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<OtpService>();
+
+// 
+builder.Services.AddTransient<GlobalExceptionHandler>();
 // ─────────────────────────────────────────
 // Controllers + Swagger
 // ─────────────────────────────────────────
 builder.Services.AddControllers()
+    .AddJsonOptions(opt => {
+        opt.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+    })
     .ConfigureApiBehaviorOptions(opt => {
         opt.InvalidModelStateResponseFactory = context =>
         {
@@ -121,7 +135,7 @@ builder.Services.AddControllers()
         };
     });
 builder.Services.AddEndpointsApiExplorer();
-
+builder.Services.AddSwaggerGen();
 
 // ═════════════════════════════════════════
 var app = builder.Build();
