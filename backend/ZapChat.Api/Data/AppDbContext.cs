@@ -15,6 +15,8 @@ public class AppDbContext : DbContext
     public DbSet<Friend> Friends => Set<Friend>();
     public DbSet<MessageReaction> MessageReactions => Set<MessageReaction>();
     public DbSet<MessageAttachment> MessageAttachments => Set<MessageAttachment>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -24,9 +26,27 @@ public class AppDbContext : DbContext
 
         b.Entity<User>(e =>
         {
-            e.HasIndex(u => u.Username).IsUnique();
             e.HasIndex(u => u.Email).IsUnique();
             e.Property(u => u.Bio).HasMaxLength(200);
+            e.Property(u => u.Id).ValueGeneratedNever();
+        });
+
+        b.Entity<RefreshToken>(e =>
+        {
+            e.HasIndex(r => r.Token).IsUnique();
+            e.HasIndex(r => r.UserId);
+            e.HasOne(r => r.User)
+             .WithMany()
+             .HasForeignKey(r => r.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<OtpCode>(e =>
+        {
+            e.HasIndex(o => new { o.Email, o.Type });
+            e.Property(o => o.Email).HasMaxLength(100);
+            e.Property(o => o.Code).HasMaxLength(6);
+            e.Property(o => o.Type).HasMaxLength(20);
         });
 
         b.Entity<Conversation>(e =>
