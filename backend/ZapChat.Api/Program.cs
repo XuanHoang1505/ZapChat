@@ -11,6 +11,7 @@ using ZapChat.Api.Common.Exceptions;
 using ZapChat.Api.Services;
 using ZapChat.Api.Services.Interfaces;
 using ZapChat.Api.Common.Helpers;
+using ZapChat.Api.Common.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -102,14 +103,19 @@ builder.Services.AddScoped<JwtHelper>();
 // DI — Services
 // ─────────────────────────────────────────
 builder.Services.AddScoped<IAuthService, AuthService>();
-// builder.Services.AddScoped<IUserService, UserService>();
-// builder.Services.AddScoped<IMessageService, MessageService>();
-// builder.Services.AddScoped<IConversationService, ConversationService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
 
 // Các service khác (gửi mail, upload ảnh, OTP)
+
+builder.Services.Configure<EmailSetting>(
+    builder.Configuration.GetSection("EmailSetting"));
 builder.Services.AddScoped<ISendMailService, SendMailService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<OtpService>();
+
+builder.Services.AddSingleton<ConnectionManager>();
 
 // 
 builder.Services.AddTransient<GlobalExceptionHandler>();

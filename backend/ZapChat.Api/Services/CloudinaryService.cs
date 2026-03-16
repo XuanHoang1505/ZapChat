@@ -89,6 +89,27 @@ public class CloudinaryService : ICloudinaryService
             publicId, result.Result);
     }
 
+    public async Task<string> UploadFileAsync(IFormFile file, string folder)
+    {
+        if (file == null || file.Length == 0)
+            throw new ArgumentException("File không hợp lệ!");
+
+        var publicId = $"{folder}/{Guid.NewGuid()}";
+
+        using var stream = file.OpenReadStream();
+        var uploadParams = new RawUploadParams {
+            File           = new FileDescription(file.FileName, stream),
+            PublicId       = publicId,
+            UseFilename    = true,
+            UniqueFilename = true
+        };
+
+        var result = await _cloudinary.UploadAsync(uploadParams);
+        _logger.LogInformation("Upload file thành công: {Url}", result.SecureUrl);
+
+        return result.SecureUrl.ToString();
+    }
+
     // ── Extract PublicId từ URL Cloudinary ────────────
     public static string? ExtractPublicId(string imageUrl)
     {
